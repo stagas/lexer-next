@@ -1,4 +1,25 @@
-import { matchToToken, TokenReturn } from 'match-to-token'
+import { matchToToken, TokenReturn, Token } from 'match-to-token'
+
+export type ErrorHandler = (error: Error) => void
+export type FilterFunction = (token?: TokenReturn) => boolean
+
+export class UnexpectedTokenError extends SyntaxError {
+  expectedGroup: string
+  currentToken: TokenReturn
+
+  constructor(expectedGroup: string, currentToken: TokenReturn) {
+    // prettier-ignore
+    super(
+          'Unexpected token: ' + currentToken?.value
+      + '\n        expected: ' + expectedGroup
+      + '\n    but received: ' + currentToken?.group + ' "' + currentToken?.value + '"'
+      + '\n     at position: ' + currentToken?.index
+    )
+
+    this.expectedGroup = expectedGroup
+    this.currentToken = currentToken
+  }
+}
 
 export type LexerTokenizer = (
   input: string
@@ -18,17 +39,32 @@ export interface Lexer {
   peek: () => TokenReturn
   /**
    * Advances position only when current `token.group` matches `group`,
+   * and optionally when `token.value` matches `value`,
    * otherwise does nothing.
    *
    * @param group The group name to examine
+   * @param value The value to match
    */
-  accept: (group: string) => TokenReturn
+  accept: (group: string, value?: string) => TokenReturn
   /**
-   * Same as accept() except it throws when `token.group` does not match `group`.
+   * Same as accept() except it throws when `token.group` does not match `group`,
+   * or (optionally) when `token.value` does not match `value`,
    *
    * @param group The group name to examine
+   * @param value The value to match
    */
-  expect: (group: string) => TokenReturn
+  expect: (group: string, value?: string) => TokenReturn
+
+  /**
+   * Sets a function to handle errors. The error handler accepts
+   * an {@link Error) object.
+   */
+  onerror: (fn: ErrorHandler) => void
+
+  /**
+   * Sets a filter function. The filter function accepts a {@link TokenReturn}.
+   */
+  filter: (fn: FilterFunction) => void
 }
 
 /**
@@ -45,37 +81,82 @@ export type LexerFactory = (input: string) => Lexer
  *
  * @param tokenize A tokenizer Iterable factory.
  */
-export const createLexer = (tokenize: LexerTokenizer) => (input: string) => {
-  const it = tokenize(input)
+export const createLexer =
+  (tokenize: LexerTokenizer) =>
+  (input: string): Lexer => {
+    const it = tokenize(input)
 
-  let last: TokenReturn
-  let curr: TokenReturn
+    let last: TokenReturn
+    let curr: TokenReturn
 
-  const advance = () => (
-    ([last, curr] = [curr, matchToToken(it.next().value)]), last
-  )
+    //
+    // error handling
+    //
 
-  const peek = () => curr
-
-  const accept = (group: string) =>
-    curr?.group === group ? advance() : undefined
-
-  const expect = (group: string) => {
-    const token = accept(group)
-    if (!token) {
-      // prettier-ignore
-      throw new SyntaxError(
-        'Unexpected token: ' + curr?.value
-      + '\n      expected: ' + group
-      + '\n  but received: ' + curr?.group + ' "' + curr?.value + '"'
-      + '\n   at position: ' + curr?.index)
+    let errorFn: ErrorHandler = (error: Error) => {
+      throw error
     }
-    return token
+
+    const onerror = (fn: ErrorHandler) => {
+      errorFn = fn
+    }
+
+    //
+    // filter
+    //
+
+    let filterFn: FilterFunction = () => true
+
+    const filter = (fn: FilterFunction) => {
+      filterFn = fn
+      // when we receive filter, try to see if the current token passes,
+      // otherwise try to advance with our new filter using next()
+      if (!filterFn(curr)) curr = next()
+    }
+
+    //
+    // iterators
+    //
+
+    const next = () => {
+      let token
+      while ((token = matchToToken(it.next().value))) {
+        if (token && !filterFn(token)) continue
+        break
+      }
+      return token
+    }
+
+    const advance = () => (([last, curr] = [curr, next()]), last)
+
+    const peek = () => curr
+
+    const accept = (group: string, value?: string) =>
+      curr?.group === group && (value == null ? true : curr?.value === value)
+        ? advance()
+        : undefined
+
+    const expect = (group: string, value?: string) => {
+      const token = accept(group, value)
+      if (!token) errorFn(new UnexpectedTokenError(group, curr))
+      return token
+    }
+
+    //
+    // exports
+    //
+
+    advance() // initial advance is implicit
+
+    return {
+      onerror,
+      filter,
+      peek,
+      advance,
+      expect,
+      accept
+    }
   }
 
-  advance() // initial advance is implicit
-
-  return { advance, peek, accept, expect }
-}
-
+export type { TokenReturn, Token }
 export default createLexer

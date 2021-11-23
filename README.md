@@ -13,7 +13,7 @@ lexer for recursive descent parsers
  · <a href="https://github.com/stagas/lexer-next/issues">   🖐️ <strong>Help</strong></a>
 </p>
 
----
+***
 
 ## Install
 
@@ -62,75 +62,26 @@ console.log(expect('number'))
 
 #### Table of Contents
 
-- [Lexer](#lexer)
-  - [advance](#advance)
-  - [peek](#peek)
-  - [accept](#accept)
-    - [Parameters](#parameters)
-  - [expect](#expect)
-    - [Parameters](#parameters-1)
-- [LexerFactory](#lexerfactory)
-- [createLexer](#createlexer)
-  - [Parameters](#parameters-2)
-
-### Lexer
-
-[src/index.ts:10-32](https://github.com/stagas/lexer-next/blob/cfe6fdfe7cdb68da117f625c5d46583a089165f1/src/index.ts#L10-L32 'Source code on GitHub')
-
-Lexer interface.
-
-#### advance
-
-[src/index.ts:14-14](https://github.com/stagas/lexer-next/blob/cfe6fdfe7cdb68da117f625c5d46583a089165f1/src/index.ts#L14-L14 'Source code on GitHub')
-
-Returns token under current position and advances.
-
-Type: function (): TokenReturn
-
-#### peek
-
-[src/index.ts:18-18](https://github.com/stagas/lexer-next/blob/cfe6fdfe7cdb68da117f625c5d46583a089165f1/src/index.ts#L18-L18 'Source code on GitHub')
-
-Returns token under current position.
-
-Type: function (): TokenReturn
-
-#### accept
-
-[src/index.ts:25-25](https://github.com/stagas/lexer-next/blob/cfe6fdfe7cdb68da117f625c5d46583a089165f1/src/index.ts#L25-L25 'Source code on GitHub')
-
-Advances position only when current `token.group` matches `group`,
-otherwise does nothing.
-
-Type: function (group: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)): TokenReturn
-
-##### Parameters
-
-- `group` The group name to examine
-
-#### expect
-
-[src/index.ts:31-31](https://github.com/stagas/lexer-next/blob/cfe6fdfe7cdb68da117f625c5d46583a089165f1/src/index.ts#L31-L31 'Source code on GitHub')
-
-Same as accept() except it throws when `token.group` does not match `group`.
-
-Type: function (group: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)): TokenReturn
-
-##### Parameters
-
-- `group` The group name to examine
-
-### LexerFactory
-
-[src/index.ts:37-37](https://github.com/stagas/lexer-next/blob/cfe6fdfe7cdb68da117f625c5d46583a089165f1/src/index.ts#L34-L36 'Source code on GitHub')
-
-Generate a [Lexer](#lexer) for given input string.
-
-Type: function (input: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)): [Lexer](#lexer)
+*   [createLexer](#createlexer)
+    *   [Parameters](#parameters)
+*   [Lexer](#lexer)
+    *   [advance](#advance)
+    *   [peek](#peek)
+    *   [accept](#accept)
+        *   [Parameters](#parameters-1)
+    *   [expect](#expect)
+        *   [Parameters](#parameters-2)
+    *   [onerror](#onerror)
+    *   [filter](#filter)
+*   [LexerFactory](#lexerfactory)
+*   [ErrorHandler](#errorhandler)
+    *   [Parameters](#parameters-3)
+*   [FilterFunction](#filterfunction)
+    *   [Parameters](#parameters-4)
 
 ### createLexer
 
-[src/index.ts:48-79](https://github.com/stagas/lexer-next/blob/cfe6fdfe7cdb68da117f625c5d46583a089165f1/src/index.ts#L48-L79 'Source code on GitHub')
+[src/index.ts:96-171](https://github.com/stagas/lexer-next/blob/2c2d06bcf83bc9d0c403de9204c2513845642624/src/index.ts#L96-L171 "Source code on GitHub")
 
 Create a [LexerFactory](#lexerfactory) with the given [LexerTokenizer](LexerTokenizer).
 
@@ -140,7 +91,109 @@ by [`String.prototype.matchAll(regexp)`](https://developer.mozilla.org/en-US/doc
 
 #### Parameters
 
-- `tokenize` **LexerTokenizer** A tokenizer Iterable factory.
+*   `tokenize` **LexerTokenizer** A tokenizer Iterable factory.
+
+### Lexer
+
+[src/index.ts:43-80](https://github.com/stagas/lexer-next/blob/2c2d06bcf83bc9d0c403de9204c2513845642624/src/index.ts#L43-L80 "Source code on GitHub")
+
+Lexer interface.
+
+#### advance
+
+[src/index.ts:47-47](https://github.com/stagas/lexer-next/blob/2c2d06bcf83bc9d0c403de9204c2513845642624/src/index.ts#L47-L47 "Source code on GitHub")
+
+Returns token under current position and advances.
+
+Type: function (): TokenReturn
+
+#### peek
+
+[src/index.ts:51-51](https://github.com/stagas/lexer-next/blob/2c2d06bcf83bc9d0c403de9204c2513845642624/src/index.ts#L51-L51 "Source code on GitHub")
+
+Returns token under current position.
+
+Type: function (): TokenReturn
+
+#### accept
+
+[src/index.ts:60-60](https://github.com/stagas/lexer-next/blob/2c2d06bcf83bc9d0c403de9204c2513845642624/src/index.ts#L60-L60 "Source code on GitHub")
+
+Advances position only when current `token.group` matches `group`,
+and optionally when `token.value` matches `value`,
+otherwise does nothing.
+
+Type: function (group: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), value: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)): TokenReturn
+
+##### Parameters
+
+*   `group`  The group name to examine
+*   `value`  The value to match
+
+#### expect
+
+[src/index.ts:68-68](https://github.com/stagas/lexer-next/blob/2c2d06bcf83bc9d0c403de9204c2513845642624/src/index.ts#L68-L68 "Source code on GitHub")
+
+Same as accept() except it throws when `token.group` does not match `group`,
+or (optionally) when `token.value` does not match `value`,
+
+Type: function (group: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), value: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)): TokenReturn
+
+##### Parameters
+
+*   `group`  The group name to examine
+*   `value`  The value to match
+
+#### onerror
+
+[src/index.ts:74-74](https://github.com/stagas/lexer-next/blob/2c2d06bcf83bc9d0c403de9204c2513845642624/src/index.ts#L74-L74 "Source code on GitHub")
+
+Sets a function to handle errors. The error handler accepts
+an [Error](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Error) object.
+
+Type: function (fn: [ErrorHandler](#errorhandler)): void
+
+#### filter
+
+[src/index.ts:79-79](https://github.com/stagas/lexer-next/blob/2c2d06bcf83bc9d0c403de9204c2513845642624/src/index.ts#L79-L79 "Source code on GitHub")
+
+Sets a filter function. The filter function accepts a [TokenReturn](TokenReturn).
+
+Type: function (fn: [FilterFunction](#filterfunction)): void
+
+### LexerFactory
+
+[src/index.ts:85-85](https://github.com/stagas/lexer-next/blob/2c2d06bcf83bc9d0c403de9204c2513845642624/src/index.ts#L82-L84 "Source code on GitHub")
+
+Generate a [Lexer](#lexer) for given input string.
+
+Type: function (input: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)): [Lexer](#lexer)
+
+### ErrorHandler
+
+[src/index.ts:8-8](https://github.com/stagas/lexer-next/blob/2c2d06bcf83bc9d0c403de9204c2513845642624/src/index.ts#L3-L7 "Source code on GitHub")
+
+Error handler.
+
+Type: function (error: [Error](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Error)): void
+
+#### Parameters
+
+*   `error`  The error object
+
+### FilterFunction
+
+[src/index.ts:16-16](https://github.com/stagas/lexer-next/blob/2c2d06bcf83bc9d0c403de9204c2513845642624/src/index.ts#L10-L15 "Source code on GitHub")
+
+Filter function.
+
+Type: function (token: TokenReturn): [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+#### Parameters
+
+*   `token`  The token to match.
+
+Returns **any** `true` if it passes or `false` if it's rejected
 
 ## Contribute
 

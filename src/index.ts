@@ -1,6 +1,18 @@
 import { matchToToken, TokenReturn, Token } from 'match-to-token'
 
+/**
+ * Error handler.
+ *
+ * @param error The error object
+ */
 export type ErrorHandler = (error: Error) => void
+
+/**
+ * Filter function.
+ *
+ * @param token The token to match.
+ * @returns `true` if it passes or `false` if it's rejected
+ */
 export type FilterFunction = (token?: TokenReturn) => boolean
 
 export class UnexpectedTokenError extends SyntaxError {
@@ -57,7 +69,7 @@ export interface Lexer {
 
   /**
    * Sets a function to handle errors. The error handler accepts
-   * an {@link Error) object.
+   * an {@link Error} object.
    */
   onerror: (fn: ErrorHandler) => void
 

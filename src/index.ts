@@ -1,12 +1,12 @@
-import { matchToToken, TokenReturn, Token } from 'match-to-token'
+import { matchToToken, Token } from 'match-to-token'
 
-interface LexerToken extends Token {
+export interface LexerToken extends Token {
   source: {
     input: string
   }
 }
 
-type LexerTokenReturn = LexerToken | void
+export type LexerTokenReturn = LexerToken | void
 
 /**
  * Error handler.
@@ -21,7 +21,7 @@ export type ErrorHandler = (error: Error) => void
  * @param token The token to match.
  * @returns `true` if it passes or `false` if it's rejected
  */
-export type FilterFunction = (token?: TokenReturn) => boolean
+export type FilterFunction = (token?: LexerTokenReturn) => boolean
 
 export class UnexpectedTokenError extends SyntaxError {
   currentToken: LexerTokenReturn
@@ -190,5 +190,4 @@ export const createLexer =
     }
   }
 
-export type { LexerTokenReturn, Token }
 export default createLexer

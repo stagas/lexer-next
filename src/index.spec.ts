@@ -174,4 +174,19 @@ describe('createLexer', () => {
 
     expect(l.advance()).toBeUndefined()
   })
+
+  it('include source code with tokens', () => {
+    const tokenizer = (input: string) =>
+      input.matchAll(/(?<ident>[a-z]+)|(?<number>[0-9]+)/g)
+    const lexer = createLexer(tokenizer)
+
+    const input = 'foo 0123 bar 456 baz'
+    const l = lexer(input)
+
+    l.filter(token => token?.group === 'number')
+
+    const source = l.advance()!.source
+    expect(source).toEqual({ input })
+    expect(l.advance()!.source).toBe(source)
+  })
 })

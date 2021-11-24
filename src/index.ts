@@ -1,5 +1,13 @@
 import { matchToToken, TokenReturn, Token } from 'match-to-token'
 
+interface LexerToken extends Token {
+  source: {
+    input: string
+  }
+}
+
+type LexerTokenReturn = LexerToken | void
+
 /**
  * Error handler.
  *
@@ -50,11 +58,11 @@ export interface Lexer {
   /**
    * Returns token under current position and advances.
    */
-  advance: () => TokenReturn
+  advance: () => LexerTokenReturn
   /**
    * Returns token under current position.
    */
-  peek: () => TokenReturn
+  peek: () => LexerTokenReturn
   /**
    * Advances position only when current `token.group` matches `group`,
    * and optionally when `token.value` matches `value`,
@@ -63,7 +71,7 @@ export interface Lexer {
    * @param group The group name to examine
    * @param value The value to match
    */
-  accept: (group: string, value?: string) => TokenReturn
+  accept: (group: string, value?: string) => LexerTokenReturn
   /**
    * Same as accept() except it throws when `token.group` does not match `group`,
    * or (optionally) when `token.value` does not match `value`,
@@ -71,7 +79,7 @@ export interface Lexer {
    * @param group The group name to examine
    * @param value The value to match
    */
-  expect: (group: string, value?: string) => TokenReturn
+  expect: (group: string, value?: string) => LexerTokenReturn
 
   /**
    * Sets a function to handle errors. The error handler accepts
@@ -80,7 +88,7 @@ export interface Lexer {
   onerror: (fn: ErrorHandler) => void
 
   /**
-   * Sets a filter function. The filter function accepts a {@link TokenReturn}.
+   * Sets a filter function. The filter function accepts a {@link LexerTokenReturn}.
    */
   filter: (fn: FilterFunction) => void
 }
@@ -102,10 +110,11 @@ export type LexerFactory = (input: string) => Lexer
 export const createLexer =
   (tokenize: LexerTokenizer) =>
   (input: string): Lexer => {
+    const source = { input }
     const it = tokenize(input)
 
-    let last: TokenReturn
-    let curr: TokenReturn
+    let last: LexerTokenReturn
+    let curr: LexerTokenReturn
 
     //
     // error handling
@@ -138,10 +147,15 @@ export const createLexer =
 
     const next = () => {
       let token
-      while ((token = matchToToken(it.next().value))) {
+      while ((token = matchToToken(it.next().value) as LexerTokenReturn)) {
         if (token && !filterFn(token)) continue
         break
       }
+      if (token != null)
+        Object.defineProperty(token, 'source', {
+          value: source,
+          enumerable: false
+        })
       return token
     }
 
@@ -176,5 +190,5 @@ export const createLexer =
     }
   }
 
-export type { TokenReturn, Token }
+export type { LexerTokenReturn, Token }
 export default createLexer

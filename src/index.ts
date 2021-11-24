@@ -16,20 +16,26 @@ export type ErrorHandler = (error: Error) => void
 export type FilterFunction = (token?: TokenReturn) => boolean
 
 export class UnexpectedTokenError extends SyntaxError {
+  currentToken: LexerTokenReturn
   expectedGroup: string
-  currentToken: TokenReturn
+  expectedValue?: string
 
-  constructor(expectedGroup: string, currentToken: TokenReturn) {
+  constructor(
+    currentToken: LexerTokenReturn,
+    expectedGroup: string,
+    expectedValue?: string
+  ) {
     // prettier-ignore
     super(
           'Unexpected token: ' + currentToken?.value
-      + '\n        expected: ' + expectedGroup
+      + '\n        expected: ' + expectedGroup + ' ' + (expectedValue ? '"' + expectedValue + '"': '')
       + '\n    but received: ' + currentToken?.group + ' "' + currentToken?.value + '"'
       + '\n     at position: ' + currentToken?.index
     )
 
-    this.expectedGroup = expectedGroup
     this.currentToken = currentToken
+    this.expectedGroup = expectedGroup
+    this.expectedValue = expectedValue
   }
 }
 
@@ -150,7 +156,7 @@ export const createLexer =
 
     const expect = (group: string, value?: string) => {
       const token = accept(group, value)
-      if (!token) errorFn(new UnexpectedTokenError(group, curr))
+      if (!token) errorFn(new UnexpectedTokenError(curr, group, value))
       return token
     }
 

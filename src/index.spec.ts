@@ -92,6 +92,8 @@ describe('createLexer', () => {
       error = e as Error
     } finally {
       expect(error?.message).toContain('Unexpected')
+      expect(error?.message).toContain('expected: ident "hello"')
+      expect(error?.message).toContain('received: ident "foo"')
     }
 
     try {
@@ -100,6 +102,7 @@ describe('createLexer', () => {
       error = e as Error
     } finally {
       expect(error?.message).toContain('Unexpected')
+      expect(error?.message).toContain('expected: any "foo"')
     }
 
     expect(l.expect('ident', 'foo')).toEqual({
@@ -114,6 +117,7 @@ describe('createLexer', () => {
       error = e as Error
     } finally {
       expect(error?.message).toContain('Unexpected')
+      expect(error?.message).toContain('expected: ident "foo"')
     }
 
     expect(l.expect('ident', 'bar')).toEqual({

@@ -6,8 +6,6 @@ export interface LexerToken extends Token {
   }
 }
 
-export type LexerTokenReturn = LexerToken | void
-
 /**
  * Error handler.
  *
@@ -21,24 +19,24 @@ export type ErrorHandler = (error: Error) => void
  * @param token The token to match.
  * @returns `true` if it passes or `false` if it's rejected
  */
-export type FilterFunction = (token?: LexerTokenReturn) => boolean
+export type FilterFunction = (token: LexerToken) => boolean
 
 export class UnexpectedTokenError extends SyntaxError {
-  currentToken: LexerTokenReturn
+  currentToken: LexerToken
   expectedGroup: string
   expectedValue?: string
 
   constructor(
-    currentToken: LexerTokenReturn,
+    currentToken: LexerToken,
     expectedGroup: string,
     expectedValue?: string
   ) {
     // prettier-ignore
     super(
-          'Unexpected token: ' + currentToken?.value
+          'Unexpected token: ' + currentToken.value
       + '\n        expected: ' + expectedGroup + ' ' + (expectedValue ? '"' + expectedValue + '"': '')
-      + '\n    but received: ' + currentToken?.group + ' "' + currentToken?.value + '"'
-      + '\n     at position: ' + currentToken?.index
+      + '\n    but received: ' + currentToken.group + ' "' + currentToken.value + '"'
+      + '\n     at position: ' + currentToken.index
     )
 
     this.currentToken = currentToken
@@ -58,11 +56,11 @@ export interface Lexer {
   /**
    * Returns token under current position and advances.
    */
-  advance: () => LexerTokenReturn
+  advance: () => LexerToken
   /**
    * Returns token under current position.
    */
-  peek: () => LexerTokenReturn
+  peek: () => LexerToken
   /**
    * Advances position only when current `token.group` matches `group`,
    * and optionally when `token.value` matches `value`,
@@ -71,7 +69,7 @@ export interface Lexer {
    * @param group The group name to examine
    * @param value The value to match
    */
-  accept: (group: string, value?: string) => LexerTokenReturn
+  accept: (group: string, value?: string) => LexerToken | null
   /**
    * Same as accept() except it throws when `token.group` does not match `group`,
    * or (optionally) when `token.value` does not match `value`,
@@ -79,7 +77,7 @@ export interface Lexer {
    * @param group The group name to examine
    * @param value The value to match
    */
-  expect: (group: string, value?: string) => LexerTokenReturn
+  expect: (group: string, value?: string) => LexerToken
 
   /**
    * Sets a function to handle errors. The error handler accepts
@@ -88,7 +86,7 @@ export interface Lexer {
   onerror: (fn: ErrorHandler) => void
 
   /**
-   * Sets a filter function. The filter function accepts a {@link LexerTokenReturn}.
+   * Sets a filter function. The filter function accepts a {@link LexerToken}.
    */
   filter: (fn: FilterFunction) => void
 }
@@ -111,10 +109,12 @@ export const createLexer =
   (tokenize: LexerTokenizer) =>
   (input: string): Lexer => {
     const source = { input }
+    const eof = { value: '', group: 'eof', index: input.length } as LexerToken
+
     const it = tokenize(input)
 
-    let last: LexerTokenReturn
-    let curr: LexerTokenReturn
+    let last: LexerToken
+    let curr: LexerToken
 
     //
     // error handling
@@ -147,15 +147,19 @@ export const createLexer =
 
     const next = () => {
       let token
-      while ((token = matchToToken(it.next().value) as LexerTokenReturn)) {
+
+      while ((token = matchToToken(it.next().value) as LexerToken)) {
         if (token && !filterFn(token)) continue
         break
       }
-      if (token != null)
-        Object.defineProperty(token, 'source', {
-          value: source,
-          enumerable: false
-        })
+
+      if (!token) token = eof
+
+      Object.defineProperty(token, 'source', {
+        value: source,
+        enumerable: false
+      })
+
       return token
     }
 
@@ -164,14 +168,15 @@ export const createLexer =
     const peek = () => curr
 
     const accept = (group: string, value?: string) =>
-      curr?.group === group && (value == null ? true : curr?.value === value)
+      curr.group === group && (value == null ? true : curr.value === value)
         ? advance()
-        : undefined
+        : null
 
     const expect = (group: string, value?: string) => {
       const token = accept(group, value)
       if (!token) errorFn(new UnexpectedTokenError(curr, group, value))
-      return token
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return token!
     }
 
     //

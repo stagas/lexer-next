@@ -51,9 +51,17 @@ describe('createLexer', () => {
       index: 8
     })
 
-    expect(l.peek()).toBeUndefined()
+    expect(l.peek()).toEqual({
+      group: 'eof',
+      value: '',
+      index: 11
+    })
 
-    expect(l.advance()).toBeUndefined()
+    expect(l.advance()).toEqual({
+      group: 'eof',
+      value: '',
+      index: 11
+    })
   })
 
   it('accept(group, value)', () => {
@@ -172,7 +180,11 @@ describe('createLexer', () => {
       index: 13
     })
 
-    expect(l.advance()).toBeUndefined()
+    expect(l.advance()).toEqual({
+      group: 'eof',
+      value: '',
+      index: 20
+    })
   })
 
   it('include source code with tokens', () => {

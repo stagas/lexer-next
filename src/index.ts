@@ -59,8 +59,13 @@ export interface Lexer {
   advance: () => LexerToken
   /**
    * Returns token under current position.
+   * When passed a `group` and maybe a `value` it will only return
+   * the token if they match, otherwise will return `null`.
+   *
+   * @param group The group name to examine
+   * @param value The value to match
    */
-  peek: () => LexerToken
+  peek: (group?: string, value?: string) => LexerToken | null
   /**
    * Advances position only when current `token.group` matches `group`,
    * and optionally when `token.value` matches `value`,
@@ -165,7 +170,16 @@ export const createLexer =
 
     const advance = () => (([last, curr] = [curr, next()]), last)
 
-    const peek = () => curr
+    const peek = (group?: string, value?: string) =>
+      group != null
+        ? curr.group === group
+          ? value != null
+            ? curr.value === value
+              ? curr
+              : null
+            : curr
+          : null
+        : curr
 
     const accept = (group: string, value?: string) =>
       curr.group === group && (value == null ? true : curr.value === value)

@@ -37,7 +37,7 @@ describe('createLexer', () => {
       expect(error?.message).toContain('Unexpected')
     }
 
-    expect(l.accept('foo')).toBeUndefined()
+    expect(l.accept('foo')).toBeNull()
 
     expect(l.peek()).toEqual({
       group: 'ident',
@@ -70,15 +70,15 @@ describe('createLexer', () => {
     const lexer = createLexer(tokenizer)
     const l = lexer('foo bar baz')
 
-    expect(l.accept('ident', 'hello')).toBeUndefined()
-    expect(l.accept('any', 'foo')).toBeUndefined()
+    expect(l.accept('ident', 'hello')).toBeNull()
+    expect(l.accept('any', 'foo')).toBeNull()
     expect(l.accept('ident', 'foo')).toEqual({
       group: 'ident',
       value: 'foo',
       index: 0
     })
 
-    expect(l.accept('ident', 'foo')).toBeUndefined()
+    expect(l.accept('ident', 'foo')).toBeNull()
     expect(l.accept('ident', 'bar')).toEqual({
       group: 'ident',
       value: 'bar',
@@ -200,5 +200,61 @@ describe('createLexer', () => {
     const source = l.advance()!.source
     expect(source).toEqual({ input })
     expect(l.advance()!.source).toBe(source)
+  })
+
+  it('peek(group?, value?)', () => {
+    const tokenizer = (input: string) =>
+      input.matchAll(/(?<ident>[a-z]+)|(?<number>[0-9]+)/g)
+    const lexer = createLexer(tokenizer)
+
+    const l = lexer('foo 0123 bar 456 baz')
+
+    expect(l.peek()).toEqual({
+      group: 'ident',
+      value: 'foo',
+      index: 0
+    })
+
+    expect(l.peek('ident')).toEqual({
+      group: 'ident',
+      value: 'foo',
+      index: 0
+    })
+
+    expect(l.peek('ident', 'foo')).toEqual({
+      group: 'ident',
+      value: 'foo',
+      index: 0
+    })
+
+    expect(l.peek('ident', 'yo')).toBeNull()
+
+    expect(l.peek('number')).toBeNull()
+
+    expect(l.peek('number', '0123')).toBeNull()
+
+    l.advance()
+
+    expect(l.peek()).toEqual({
+      group: 'number',
+      value: '0123',
+      index: 4
+    })
+
+    expect(l.peek('number')).toEqual({
+      group: 'number',
+      value: '0123',
+      index: 4
+    })
+
+    expect(l.peek('number', '0123')).toEqual({
+      group: 'number',
+      value: '0123',
+      index: 4
+    })
+
+    expect(l.peek('number', '012')).toBeNull()
+
+    expect(l.peek('ident')).toBeNull()
   })
 })

@@ -3,7 +3,7 @@
   "author": "stagas",
   "short": "stagas/lexer-next",
   "description": "lexer for recursive descent parsers",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -57,7 +57,7 @@
     }
   },
   "dependencies": {
-    "match-to-token": "^1.0.0"
+    "match-to-token": "^1.0.1"
   },
   "devDependencies": {
     "@sucrase/jest-plugin": "^2.2.0",
@@ -74,7 +74,7 @@
     "husky": "^7.0.4",
     "jest": "^27.3.1",
     "onchange": "^7.1.0",
-    "prettier": "^2.4.1",
+    "prettier": "^2.5.0",
     "rimraf": "^3.0.2",
     "ts-jest": "^27.0.7",
     "ts-node": "^10.4.0",

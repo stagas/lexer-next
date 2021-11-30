@@ -56,7 +56,7 @@ export interface Lexer {
   /**
    * Returns token under current position and advances.
    */
-  advance: () => LexerToken
+  advance(): LexerToken
   /**
    * Returns token under current position.
    * When passed a `group` and maybe a `value` it will only return
@@ -65,7 +65,8 @@ export interface Lexer {
    * @param group The group name to examine
    * @param value The value to match
    */
-  peek: (group?: string, value?: string) => LexerToken | null
+  peek(): LexerToken
+  peek(group?: string, value?: string): LexerToken | null
   /**
    * Advances position only when current `token.group` matches `group`,
    * and optionally when `token.value` matches `value`,
@@ -74,7 +75,7 @@ export interface Lexer {
    * @param group The group name to examine
    * @param value The value to match
    */
-  accept: (group: string, value?: string) => LexerToken | null
+  accept(group: string, value?: string): LexerToken | null
   /**
    * Same as accept() except it throws when `token.group` does not match `group`,
    * or (optionally) when `token.value` does not match `value`,
@@ -82,18 +83,18 @@ export interface Lexer {
    * @param group The group name to examine
    * @param value The value to match
    */
-  expect: (group: string, value?: string) => LexerToken
+  expect(group: string, value?: string): LexerToken
 
   /**
    * Sets a function to handle errors. The error handler accepts
    * an {@link Error} object.
    */
-  onerror: (fn: ErrorHandler) => void
+  onerror(fn: ErrorHandler): void
 
   /**
    * Sets a filter function. The filter function accepts a {@link LexerToken}.
    */
-  filter: (fn: FilterFunction) => void
+  filter(fn: FilterFunction): void
 }
 
 /**
@@ -206,7 +207,7 @@ export const createLexer =
       advance,
       expect,
       accept
-    }
+    } as Lexer
   }
 
 export default createLexer

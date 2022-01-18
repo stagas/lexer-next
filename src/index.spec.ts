@@ -1,28 +1,29 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { createLexer } from './'
+import { createLexer, RegExpToken } from './'
 
 describe('createLexer', () => {
   it('e2e', () => {
-    const tokenizer = (input: string) => input.matchAll(/(?<ident>[a-z]+)/g)
+    const tokenizer = (input: string) =>
+      input.matchAll(new RegExpToken(/(?<ident>[a-z]+)/g))
 
     const lexer = createLexer(tokenizer)
     const l = lexer('foo bar baz')
 
-    expect(l.peek()).toEqual({ group: 'ident', value: 'foo', index: 0 })
+    expect(l.peek()).toMatchObject({ group: 'ident', value: 'foo', index: 0 })
 
-    expect(l.advance()).toEqual({
+    expect(l.advance()).toMatchObject({
       group: 'ident',
       value: 'foo',
       index: 0
     })
 
-    expect(l.peek()).toEqual({
+    expect(l.peek()).toMatchObject({
       group: 'ident',
       value: 'bar',
       index: 4
     })
 
-    expect(l.expect('ident')).toEqual({
+    expect(l.expect('ident')).toMatchObject({
       group: 'ident',
       value: 'bar',
       index: 4
@@ -39,25 +40,25 @@ describe('createLexer', () => {
 
     expect(l.accept('foo')).toBeNull()
 
-    expect(l.peek()).toEqual({
+    expect(l.peek()).toMatchObject({
       group: 'ident',
       value: 'baz',
       index: 8
     })
 
-    expect(l.advance()).toEqual({
+    expect(l.advance()).toMatchObject({
       group: 'ident',
       value: 'baz',
       index: 8
     })
 
-    expect(l.peek()).toEqual({
+    expect(l.peek()).toMatchObject({
       group: 'eof',
       value: '',
       index: 11
     })
 
-    expect(l.advance()).toEqual({
+    expect(l.advance()).toMatchObject({
       group: 'eof',
       value: '',
       index: 11
@@ -65,21 +66,22 @@ describe('createLexer', () => {
   })
 
   it('accept(group, value)', () => {
-    const tokenizer = (input: string) => input.matchAll(/(?<ident>[a-z]+)/g)
+    const tokenizer = (input: string) =>
+      input.matchAll(new RegExpToken(/(?<ident>[a-z]+)/g))
 
     const lexer = createLexer(tokenizer)
     const l = lexer('foo bar baz')
 
     expect(l.accept('ident', 'hello')).toBeNull()
     expect(l.accept('any', 'foo')).toBeNull()
-    expect(l.accept('ident', 'foo')).toEqual({
+    expect(l.accept('ident', 'foo')).toMatchObject({
       group: 'ident',
       value: 'foo',
       index: 0
     })
 
     expect(l.accept('ident', 'foo')).toBeNull()
-    expect(l.accept('ident', 'bar')).toEqual({
+    expect(l.accept('ident', 'bar')).toMatchObject({
       group: 'ident',
       value: 'bar',
       index: 4
@@ -87,7 +89,8 @@ describe('createLexer', () => {
   })
 
   it('expect(group, value)', () => {
-    const tokenizer = (input: string) => input.matchAll(/(?<ident>[a-z]+)/g)
+    const tokenizer = (input: string) =>
+      input.matchAll(new RegExpToken(/(?<ident>[a-z]+)/g))
 
     const lexer = createLexer(tokenizer)
     const l = lexer('foo bar baz')
@@ -113,7 +116,7 @@ describe('createLexer', () => {
       expect(error?.message).toContain('expected: any "foo"')
     }
 
-    expect(l.expect('ident', 'foo')).toEqual({
+    expect(l.expect('ident', 'foo')).toMatchObject({
       group: 'ident',
       value: 'foo',
       index: 0
@@ -128,7 +131,7 @@ describe('createLexer', () => {
       expect(error?.message).toContain('expected: ident "foo"')
     }
 
-    expect(l.expect('ident', 'bar')).toEqual({
+    expect(l.expect('ident', 'bar')).toMatchObject({
       group: 'ident',
       value: 'bar',
       index: 4
@@ -136,7 +139,8 @@ describe('createLexer', () => {
   })
 
   it('onerror(errFn)', () => {
-    const tokenizer = (input: string) => input.matchAll(/(?<ident>[a-z]+)/g)
+    const tokenizer = (input: string) =>
+      input.matchAll(new RegExpToken(/(?<ident>[a-z]+)/g))
 
     const lexer = createLexer(tokenizer)
     const l = lexer('foo bar baz')
@@ -155,32 +159,32 @@ describe('createLexer', () => {
 
   it('filter(fn)', () => {
     const tokenizer = (input: string) =>
-      input.matchAll(/(?<ident>[a-z]+)|(?<number>[0-9]+)/g)
+      input.matchAll(new RegExpToken(/(?<ident>[a-z]+)|(?<number>[0-9]+)/g))
     const lexer = createLexer(tokenizer)
 
     const l = lexer('foo 0123 bar 456 baz')
 
     l.filter(token => token?.group === 'number')
 
-    expect(l.peek()).toEqual({
+    expect(l.peek()).toMatchObject({
       group: 'number',
       value: '0123',
       index: 4
     })
 
-    expect(l.advance()).toEqual({
+    expect(l.advance()).toMatchObject({
       group: 'number',
       value: '0123',
       index: 4
     })
 
-    expect(l.advance()).toEqual({
+    expect(l.advance()).toMatchObject({
       group: 'number',
       value: '456',
       index: 13
     })
 
-    expect(l.advance()).toEqual({
+    expect(l.advance()).toMatchObject({
       group: 'eof',
       value: '',
       index: 20
@@ -189,7 +193,7 @@ describe('createLexer', () => {
 
   it('include source code with tokens', () => {
     const tokenizer = (input: string) =>
-      input.matchAll(/(?<ident>[a-z]+)|(?<number>[0-9]+)/g)
+      input.matchAll(new RegExpToken(/(?<ident>[a-z]+)|(?<number>[0-9]+)/g))
     const lexer = createLexer(tokenizer)
 
     const input = 'foo 0123 bar 456 baz'
@@ -197,64 +201,64 @@ describe('createLexer', () => {
 
     l.filter(token => token?.group === 'number')
 
-    const source = l.advance()!.source
-    expect(source).toEqual({ input })
-    expect(l.advance()!.source).toBe(source)
+    const source = l.advance().source
+    expect(source).toMatchObject({ input })
+    expect(l.advance().source.input).toEqual(source.input)
   })
 
   it('peek(group?, value?)', () => {
     const tokenizer = (input: string) =>
-      input.matchAll(/(?<ident>[a-z]+)|(?<number>[0-9]+)/g)
+      input.matchAll(new RegExpToken(/(?<ident>[a-z]+)|(?<number>[0-9]+)/g))
     const lexer = createLexer(tokenizer)
 
     const l = lexer('foo 0123 bar 456 baz')
 
-    expect(l.peek()).toEqual({
+    expect(l.peek()).toMatchObject({
       group: 'ident',
       value: 'foo',
       index: 0
     })
 
-    expect(l.peek('ident')).toEqual({
+    expect(l.peek('ident')).toMatchObject({
       group: 'ident',
       value: 'foo',
       index: 0
     })
 
-    expect(l.peek('ident', 'foo')).toEqual({
+    expect(l.peek('ident', 'foo')).toMatchObject({
       group: 'ident',
       value: 'foo',
       index: 0
     })
 
-    expect(l.peek('ident', 'yo')).toBeNull()
+    expect(l.peek('ident', 'yo')).toBeFalsy()
 
-    expect(l.peek('number')).toBeNull()
+    expect(l.peek('number')).toBeFalsy()
 
-    expect(l.peek('number', '0123')).toBeNull()
+    expect(l.peek('number', '0123')).toBeFalsy()
 
     l.advance()
 
-    expect(l.peek()).toEqual({
+    expect(l.peek()).toMatchObject({
       group: 'number',
       value: '0123',
       index: 4
     })
 
-    expect(l.peek('number')).toEqual({
+    expect(l.peek('number')).toMatchObject({
       group: 'number',
       value: '0123',
       index: 4
     })
 
-    expect(l.peek('number', '0123')).toEqual({
+    expect(l.peek('number', '0123')).toMatchObject({
       group: 'number',
       value: '0123',
       index: 4
     })
 
-    expect(l.peek('number', '012')).toBeNull()
+    expect(l.peek('number', '012')).toBeFalsy()
 
-    expect(l.peek('ident')).toBeNull()
+    expect(l.peek('ident')).toBeFalsy()
   })
 })

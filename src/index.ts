@@ -1,10 +1,8 @@
-import { matchToToken, Token } from 'match-to-token'
+import { RegExpToken, MatchToken, Token } from 'match-to-token'
 
-export interface LexerToken extends Token {
-  source: {
-    input: string
-  }
-}
+export { RegExpToken }
+
+export type { Token }
 
 /**
  * Error handler.
@@ -19,18 +17,14 @@ export type ErrorHandler = (error: Error) => void
  * @param token The token to match.
  * @returns `true` if it passes or `false` if it's rejected
  */
-export type FilterFunction = (token: LexerToken) => boolean
+export type FilterFunction = (token: Token) => boolean
 
 export class UnexpectedTokenError extends SyntaxError {
-  currentToken: LexerToken
+  currentToken: Token
   expectedGroup: string
   expectedValue?: string
 
-  constructor(
-    currentToken: LexerToken,
-    expectedGroup: string,
-    expectedValue?: string
-  ) {
+  constructor(currentToken: Token, expectedGroup: string, expectedValue?: string) {
     // prettier-ignore
     super(
           'Unexpected token: ' + currentToken.value
@@ -45,9 +39,7 @@ export class UnexpectedTokenError extends SyntaxError {
   }
 }
 
-export type LexerTokenizer = (
-  input: string
-) => IterableIterator<RegExpMatchArray>
+export type Tokenizer = (input: string) => IterableIterator<RegExpMatchArray>
 
 /**
  * Lexer interface.
@@ -56,7 +48,7 @@ export interface Lexer {
   /**
    * Returns token under current position and advances.
    */
-  advance(): LexerToken
+  advance(): Token
   /**
    * Returns token under current position.
    * When passed a `group` and maybe a `value` it will only return
@@ -65,8 +57,8 @@ export interface Lexer {
    * @param group The group name to examine
    * @param value The value to match
    */
-  peek(): LexerToken
-  peek(group?: string, value?: string): LexerToken | null
+  peek(): Token
+  peek(group?: string, value?: string): Token | false
   /**
    * Advances position only when current `token.group` matches `group`,
    * and optionally when `token.value` matches `value`,
@@ -75,7 +67,7 @@ export interface Lexer {
    * @param group The group name to examine
    * @param value The value to match
    */
-  accept(group: string, value?: string): LexerToken | null
+  accept(group: string, value?: string): Token | null
   /**
    * Same as accept() except it throws when `token.group` does not match `group`,
    * or (optionally) when `token.value` does not match `value`,
@@ -83,16 +75,15 @@ export interface Lexer {
    * @param group The group name to examine
    * @param value The value to match
    */
-  expect(group: string, value?: string): LexerToken
+  expect(group: string, value?: string): Token
 
   /**
-   * Sets a function to handle errors. The error handler accepts
-   * an {@link Error} object.
+   * Sets a function to handle errors. The error handler accepts an {@link Error} object.
    */
   onerror(fn: ErrorHandler): void
 
   /**
-   * Sets a filter function. The filter function accepts a {@link LexerToken}.
+   * Sets a filter function. The filter function receives a {@link Token} as first parameter.
    */
   filter(fn: FilterFunction): void
 }
@@ -103,7 +94,7 @@ export interface Lexer {
 export type LexerFactory = (input: string) => Lexer
 
 /**
- * Create a {@link LexerFactory} with the given {@link LexerTokenizer}.
+ * Create a {@link LexerFactory} with the given {@link Tokenizer}.
  *
  * It can be anything that, when called with an `input` string, returns an interface that conforms to
  * the `IterableIterator<RegExpMatchArray>` type as is returned, for example,
@@ -112,15 +103,14 @@ export type LexerFactory = (input: string) => Lexer
  * @param tokenize A tokenizer Iterable factory.
  */
 export const createLexer =
-  (tokenize: LexerTokenizer) =>
+  (tokenize: Tokenizer) =>
   (input: string): Lexer => {
-    const source = { input }
-    const eof = { value: '', group: 'eof', index: input.length } as LexerToken
+    const eof = MatchToken.create('', 'eof', { index: input.length, input })
 
     const it = tokenize(input)
 
-    let last: LexerToken
-    let curr: LexerToken
+    let last: Token
+    let curr: Token
 
     //
     // error handling
@@ -153,45 +143,20 @@ export const createLexer =
 
     const next = () => {
       let token
-
-      while ((token = matchToToken(it.next().value) as LexerToken)) {
+      while ((token = it.next().value as Token)) {
         if (token && !filterFn(token)) continue
         break
       }
-
       if (!token) token = eof
-
-      Object.defineProperty(token, 'source', {
-        value: source,
-        enumerable: false
-      })
-
-      return token
+      return token as Token
     }
-
     const advance = () => (([last, curr] = [curr, next()]), last)
-
-    const peek = (group?: string, value?: string) =>
-      group != null
-        ? curr.group === group
-          ? value != null
-            ? curr.value === value
-              ? curr
-              : null
-            : curr
-          : null
-        : curr
-
-    const accept = (group: string, value?: string) =>
-      curr.group === group && (value == null ? true : curr.value === value)
-        ? advance()
-        : null
-
+    const peek = (group?: string, value?: string) => (group != null ? curr.is(group, value) && curr : curr)
+    const accept = (group: string, value?: string) => (curr.is(group, value) ? advance() : null)
     const expect = (group: string, value?: string) => {
       const token = accept(group, value)
       if (!token) errorFn(new UnexpectedTokenError(curr, group, value))
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      return token!
+      return token
     }
 
     //
@@ -203,8 +168,8 @@ export const createLexer =
     return {
       onerror,
       filter,
-      peek,
       advance,
+      peek,
       expect,
       accept
     } as Lexer

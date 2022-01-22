@@ -151,7 +151,8 @@ export const createLexer =
       return token as Token
     }
     const advance = () => (([last, curr] = [curr, next()]), last)
-    const peek = (group?: string, value?: string) => (group != null ? curr.is(group, value) && curr : curr)
+    const peek = (group?: string, value?: string) =>
+      group != null ? curr.is(group, value) && curr : curr
     const accept = (group: string, value?: string) => (curr.is(group, value) ? advance() : null)
     const expect = (group: string, value?: string) => {
       const token = accept(group, value)
@@ -171,7 +172,7 @@ export const createLexer =
       advance,
       peek,
       expect,
-      accept
+      accept,
     } as Lexer
   }
 

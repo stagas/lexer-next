@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { createLexer, RegExpToken } from './'
+import { createLexer, RegExpToken } from '../src'
 
 describe('createLexer', () => {
   it('e2e', () => {

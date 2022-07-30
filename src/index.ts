@@ -1,15 +1,30 @@
-import { RegExpToken, MatchToken, Token } from 'match-to-token'
+import { MatchToken, RegExpMatchArrayLike, RegExpToken, Token } from 'match-to-token'
+
+import * as LexerErrorCauses from './causes'
+
+export { LexerErrorCauses }
 
 export { RegExpToken }
 
-export type { Token }
+export type { MatchToken, RegExpMatchArrayLike, Token }
+
+export interface LexerError extends Error {
+  cause: LexerErrorCauses.UnexpectedToken
+}
+
+export class LexerError extends Error {
+  name = 'LexerError'
+  constructor(cause: Error) {
+    super(cause.message, { cause })
+  }
+}
 
 /**
  * Error handler.
  *
  * @param error The error object
  */
-export type ErrorHandler = (error: Error) => void
+export type ErrorHandler = (error: LexerError) => void
 
 /**
  * Filter function.
@@ -18,26 +33,6 @@ export type ErrorHandler = (error: Error) => void
  * @returns `true` if it passes or `false` if it's rejected
  */
 export type FilterFunction = (token: Token) => boolean
-
-export class UnexpectedTokenError extends SyntaxError {
-  currentToken: Token
-  expectedGroup: string
-  expectedValue?: string
-
-  constructor(currentToken: Token, expectedGroup: string, expectedValue?: string) {
-    // prettier-ignore
-    super(
-          'Unexpected token: ' + currentToken.value
-      + '\n        expected: ' + expectedGroup + ' ' + (expectedValue ? '"' + expectedValue + '"': '')
-      + '\n    but received: ' + currentToken.group + ' "' + currentToken.value + '"'
-      + '\n     at position: ' + currentToken.index
-    )
-
-    this.currentToken = currentToken
-    this.expectedGroup = expectedGroup
-    this.expectedValue = expectedValue
-  }
-}
 
 export type Tokenizer = (input: string) => IterableIterator<RegExpMatchArray>
 
@@ -102,8 +97,7 @@ export type LexerFactory = (input: string) => Lexer
  *
  * @param tokenize A tokenizer Iterable factory.
  */
-export const createLexer =
-  (tokenize: Tokenizer) =>
+export const createLexer = (tokenize: Tokenizer) =>
   (input: string): Lexer => {
     const eof = MatchToken.create('', 'eof', { index: input.length, input })
 
@@ -151,12 +145,11 @@ export const createLexer =
       return token as Token
     }
     const advance = () => (([last, curr] = [curr, next()]), last)
-    const peek = (group?: string, value?: string) =>
-      group != null ? curr.is(group, value) && curr : curr
+    const peek = (group?: string, value?: string) => group != null ? curr.is(group, value) && curr : curr
     const accept = (group: string, value?: string) => (curr.is(group, value) ? advance() : null)
     const expect = (group: string, value?: string) => {
       const token = accept(group, value)
-      if (!token) errorFn(new UnexpectedTokenError(curr, group, value))
+      if (!token) errorFn(new LexerError(new LexerErrorCauses.UnexpectedToken(curr, group, value)))
       return token
     }
 

@@ -1,5 +1,5 @@
 coverage
 dist
 node_modules
-.husky
 package-lock.json
+.swc

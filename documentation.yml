@@ -1,6 +1,0 @@
-toc:
-  - createLexer
-  - Lexer
-  - LexerFactory
-  - ErrorHandler
-  - FilterFunction

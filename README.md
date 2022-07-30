@@ -13,7 +13,7 @@ lexer for recursive descent parsers
  · <a href="https://github.com/stagas/lexer-next/issues">   🖐️ <strong>Help</strong></a>
 </p>
 
-***
+---
 
 ## Install
 
@@ -62,20 +62,20 @@ console.log(expect('number'))
 
 #### Table of Contents
 
-*   [ErrorHandler](#errorhandler)
-    *   [Parameters](#parameters)
-*   [FilterFunction](#filterfunction)
-    *   [Parameters](#parameters-1)
-*   [Lexer](#lexer)
-    *   [advance](#advance)
-    *   [peek](#peek)
-    *   [accept](#accept)
-    *   [expect](#expect)
-    *   [onerror](#onerror)
-    *   [filter](#filter)
-*   [LexerFactory](#lexerfactory)
-*   [createLexer](#createlexer)
-    *   [Parameters](#parameters-7)
+- [ErrorHandler](#errorhandler)
+  - [Parameters](#parameters)
+- [FilterFunction](#filterfunction)
+  - [Parameters](#parameters-1)
+- [Lexer](#lexer)
+  - [advance](#advance)
+  - [peek](#peek)
+  - [accept](#accept)
+  - [expect](#expect)
+  - [onerror](#onerror)
+  - [filter](#filter)
+- [LexerFactory](#lexerfactory)
+- [createLexer](#createlexer)
+  - [Parameters](#parameters-7)
 
 ### ErrorHandler
 
@@ -87,7 +87,7 @@ Type: function (error: [Error](https://developer.mozilla.org/docs/Web/JavaScript
 
 #### Parameters
 
-*   `error`  The error object
+- `error` The error object
 
 ### FilterFunction
 
@@ -99,7 +99,7 @@ Type: function (token: Token): [boolean](https://developer.mozilla.org/docs/Web/
 
 #### Parameters
 
-*   `token`  The token to match.
+- `token` The token to match.
 
 Returns **any** `true` if it passes or `false` if it's rejected
 
@@ -127,8 +127,8 @@ the token if they match, otherwise will return `null`.
 
 ##### Parameters
 
-*   `group`  The group name to examine
-*   `value`  The value to match
+- `group` The group name to examine
+- `value` The value to match
 
 Returns **Token**&#x20;
 
@@ -142,8 +142,8 @@ otherwise does nothing.
 
 ##### Parameters
 
-*   `group` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** The group name to examine
-*   `value` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** The value to match
+- `group` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** The group name to examine
+- `value` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** The value to match
 
 Returns **(Token | null)**&#x20;
 
@@ -156,8 +156,8 @@ or (optionally) when `token.value` does not match `value`,
 
 ##### Parameters
 
-*   `group` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** The group name to examine
-*   `value` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** The value to match
+- `group` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** The group name to examine
+- `value` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** The value to match
 
 Returns **Token**&#x20;
 
@@ -169,7 +169,7 @@ Sets a function to handle errors. The error handler accepts an [Error](https://d
 
 ##### Parameters
 
-*   `fn` **[ErrorHandler](#errorhandler)**&#x20;
+- `fn` **[ErrorHandler](#errorhandler)**&#x20;
 
 Returns **void**&#x20;
 
@@ -181,7 +181,7 @@ Sets a filter function. The filter function receives a [Token](Token) as first p
 
 ##### Parameters
 
-*   `fn` **[FilterFunction](#filterfunction)**&#x20;
+- `fn` **[FilterFunction](#filterfunction)**&#x20;
 
 Returns **void**&#x20;
 
@@ -205,7 +205,7 @@ by [`String.prototype.matchAll(regexp)`](https://developer.mozilla.org/en-US/doc
 
 #### Parameters
 
-*   `tokenize` **Tokenizer** A tokenizer Iterable factory.
+- `tokenize` **Tokenizer** A tokenizer Iterable factory.
 
 ## Contribute
 

@@ -1,7 +1,6 @@
 import { createLexer } from '../src'
 
-const tokenize = (input: string) =>
-  input.matchAll(/(?<ident>[a-z]+)|(?<number>[0-9]+)/g)
+const tokenize = (input: string) => input.matchAll(/(?<ident>[a-z]+)|(?<number>[0-9]+)/g)
 
 const lexer = createLexer(tokenize)
 

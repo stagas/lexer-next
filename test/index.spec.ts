@@ -3,8 +3,7 @@ import { createLexer, RegExpToken } from '../src'
 
 describe('createLexer', () => {
   it('e2e', () => {
-    const tokenizer = (input: string) =>
-      input.matchAll(new RegExpToken(/(?<ident>[a-z]+)/g))
+    const tokenizer = (input: string) => input.matchAll(new RegExpToken(/(?<ident>[a-z]+)/g))
 
     const lexer = createLexer(tokenizer)
     const l = lexer('foo bar baz')
@@ -14,19 +13,19 @@ describe('createLexer', () => {
     expect(l.advance()).toMatchObject({
       group: 'ident',
       value: 'foo',
-      index: 0
+      index: 0,
     })
 
     expect(l.peek()).toMatchObject({
       group: 'ident',
       value: 'bar',
-      index: 4
+      index: 4,
     })
 
     expect(l.expect('ident')).toMatchObject({
       group: 'ident',
       value: 'bar',
-      index: 4
+      index: 4,
     })
 
     let error: Error | void
@@ -43,31 +42,30 @@ describe('createLexer', () => {
     expect(l.peek()).toMatchObject({
       group: 'ident',
       value: 'baz',
-      index: 8
+      index: 8,
     })
 
     expect(l.advance()).toMatchObject({
       group: 'ident',
       value: 'baz',
-      index: 8
+      index: 8,
     })
 
     expect(l.peek()).toMatchObject({
       group: 'eof',
       value: '',
-      index: 11
+      index: 11,
     })
 
     expect(l.advance()).toMatchObject({
       group: 'eof',
       value: '',
-      index: 11
+      index: 11,
     })
   })
 
   it('accept(group, value)', () => {
-    const tokenizer = (input: string) =>
-      input.matchAll(new RegExpToken(/(?<ident>[a-z]+)/g))
+    const tokenizer = (input: string) => input.matchAll(new RegExpToken(/(?<ident>[a-z]+)/g))
 
     const lexer = createLexer(tokenizer)
     const l = lexer('foo bar baz')
@@ -77,20 +75,19 @@ describe('createLexer', () => {
     expect(l.accept('ident', 'foo')).toMatchObject({
       group: 'ident',
       value: 'foo',
-      index: 0
+      index: 0,
     })
 
     expect(l.accept('ident', 'foo')).toBeNull()
     expect(l.accept('ident', 'bar')).toMatchObject({
       group: 'ident',
       value: 'bar',
-      index: 4
+      index: 4,
     })
   })
 
   it('expect(group, value)', () => {
-    const tokenizer = (input: string) =>
-      input.matchAll(new RegExpToken(/(?<ident>[a-z]+)/g))
+    const tokenizer = (input: string) => input.matchAll(new RegExpToken(/(?<ident>[a-z]+)/g))
 
     const lexer = createLexer(tokenizer)
     const l = lexer('foo bar baz')
@@ -119,7 +116,7 @@ describe('createLexer', () => {
     expect(l.expect('ident', 'foo')).toMatchObject({
       group: 'ident',
       value: 'foo',
-      index: 0
+      index: 0,
     })
 
     try {
@@ -134,13 +131,12 @@ describe('createLexer', () => {
     expect(l.expect('ident', 'bar')).toMatchObject({
       group: 'ident',
       value: 'bar',
-      index: 4
+      index: 4,
     })
   })
 
   it('onerror(errFn)', () => {
-    const tokenizer = (input: string) =>
-      input.matchAll(new RegExpToken(/(?<ident>[a-z]+)/g))
+    const tokenizer = (input: string) => input.matchAll(new RegExpToken(/(?<ident>[a-z]+)/g))
 
     const lexer = createLexer(tokenizer)
     const l = lexer('foo bar baz')
@@ -158,8 +154,7 @@ describe('createLexer', () => {
   })
 
   it('filter(fn)', () => {
-    const tokenizer = (input: string) =>
-      input.matchAll(new RegExpToken(/(?<ident>[a-z]+)|(?<number>[0-9]+)/g))
+    const tokenizer = (input: string) => input.matchAll(new RegExpToken(/(?<ident>[a-z]+)|(?<number>[0-9]+)/g))
     const lexer = createLexer(tokenizer)
 
     const l = lexer('foo 0123 bar 456 baz')
@@ -169,31 +164,30 @@ describe('createLexer', () => {
     expect(l.peek()).toMatchObject({
       group: 'number',
       value: '0123',
-      index: 4
+      index: 4,
     })
 
     expect(l.advance()).toMatchObject({
       group: 'number',
       value: '0123',
-      index: 4
+      index: 4,
     })
 
     expect(l.advance()).toMatchObject({
       group: 'number',
       value: '456',
-      index: 13
+      index: 13,
     })
 
     expect(l.advance()).toMatchObject({
       group: 'eof',
       value: '',
-      index: 20
+      index: 20,
     })
   })
 
   it('include source code with tokens', () => {
-    const tokenizer = (input: string) =>
-      input.matchAll(new RegExpToken(/(?<ident>[a-z]+)|(?<number>[0-9]+)/g))
+    const tokenizer = (input: string) => input.matchAll(new RegExpToken(/(?<ident>[a-z]+)|(?<number>[0-9]+)/g))
     const lexer = createLexer(tokenizer)
 
     const input = 'foo 0123 bar 456 baz'
@@ -207,8 +201,7 @@ describe('createLexer', () => {
   })
 
   it('peek(group?, value?)', () => {
-    const tokenizer = (input: string) =>
-      input.matchAll(new RegExpToken(/(?<ident>[a-z]+)|(?<number>[0-9]+)/g))
+    const tokenizer = (input: string) => input.matchAll(new RegExpToken(/(?<ident>[a-z]+)|(?<number>[0-9]+)/g))
     const lexer = createLexer(tokenizer)
 
     const l = lexer('foo 0123 bar 456 baz')
@@ -216,19 +209,19 @@ describe('createLexer', () => {
     expect(l.peek()).toMatchObject({
       group: 'ident',
       value: 'foo',
-      index: 0
+      index: 0,
     })
 
     expect(l.peek('ident')).toMatchObject({
       group: 'ident',
       value: 'foo',
-      index: 0
+      index: 0,
     })
 
     expect(l.peek('ident', 'foo')).toMatchObject({
       group: 'ident',
       value: 'foo',
-      index: 0
+      index: 0,
     })
 
     expect(l.peek('ident', 'yo')).toBeFalsy()
@@ -242,19 +235,19 @@ describe('createLexer', () => {
     expect(l.peek()).toMatchObject({
       group: 'number',
       value: '0123',
-      index: 4
+      index: 4,
     })
 
     expect(l.peek('number')).toMatchObject({
       group: 'number',
       value: '0123',
-      index: 4
+      index: 4,
     })
 
     expect(l.peek('number', '0123')).toMatchObject({
       group: 'number',
       value: '0123',
-      index: 4
+      index: 4,
     })
 
     expect(l.peek('number', '012')).toBeFalsy()

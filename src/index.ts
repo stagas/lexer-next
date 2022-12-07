@@ -1,4 +1,8 @@
-import { MatchToken, RegExpMatchArrayLike, RegExpToken, Token } from 'match-to-token'
+import { RegExpMatchArrayLike, RegExpToken, Token } from 'match-to-token'
+
+export { Token }
+
+export type { TokenJson } from 'match-to-token'
 
 import * as LexerErrorCauses from './causes'
 
@@ -6,7 +10,7 @@ export { LexerErrorCauses }
 
 export { RegExpToken }
 
-export type { MatchToken, RegExpMatchArrayLike, Token }
+export type { RegExpMatchArrayLike }
 
 export interface LexerError extends Error {
   cause: LexerErrorCauses.UnexpectedToken
@@ -81,6 +85,8 @@ export interface Lexer {
    * Sets a filter function. The filter function receives a {@link Token} as first parameter.
    */
   filter(fn: FilterFunction): void
+
+  unknown: Token
 }
 
 /**
@@ -99,7 +105,8 @@ export type LexerFactory = (input: string) => Lexer
  */
 export const createLexer = (tokenize: Tokenizer) =>
   (input: string): Lexer => {
-    const eof = MatchToken.create('', 'eof', { index: input.length, input })
+    const eof = Token.create('', 'eof', { index: input.length, input })
+    const unknown = Token.create('', 'unknown', { index: 0, input })
 
     const it = tokenize(input)
 
@@ -166,6 +173,7 @@ export const createLexer = (tokenize: Tokenizer) =>
       peek,
       expect,
       accept,
+      unknown,
     } as Lexer
   }
 

@@ -1,7 +1,7 @@
 
 
 <h1>
-lexer-next <a href="https://npmjs.org/package/lexer-next"><img src="https://img.shields.io/badge/npm-v4.1.0-F00.svg?colorA=000"/></a> <a href="src"><img src="https://img.shields.io/badge/loc-92-FFF.svg?colorA=000"/></a> <a href="https://cdn.jsdelivr.net/npm/lexer-next@4.1.0/dist/lexer-next.min.js"><img src="https://img.shields.io/badge/brotli-950b-333.svg?colorA=000"/></a> <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-F0B.svg?colorA=000"/></a>
+lexer-next <a href="https://npmjs.org/package/lexer-next"><img src="https://img.shields.io/badge/npm-v4.1.1-F00.svg?colorA=000"/></a> <a href="src"><img src="https://img.shields.io/badge/loc-92-FFF.svg?colorA=000"/></a> <a href="https://cdn.jsdelivr.net/npm/lexer-next@4.1.1/dist/lexer-next.min.js"><img src="https://img.shields.io/badge/brotli-950b-333.svg?colorA=000"/></a> <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-F0B.svg?colorA=000"/></a>
 </h1>
 
 <p></p>
